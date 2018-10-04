@@ -1,0 +1,12 @@
+konfigurasi routing di tempat saya 
+ini bermaksud memaksimalkan transfer rate antara 2 server, by pass by kabel network
+cek print routenya sebagai berikut :
+
+default via 192.168.100.1 dev em1 proto static metric 100 
+192.168.30.0/24 dev em2 proto kernel scope link src 192.168.30.2 metric 101 
+192.168.100.0/24 dev em1 proto kernel scope link src 192.168.100.45 metric 100 
+
+penambahan route supaya permanent saya tambahkan file route-nama_interface
+(bisa di cek file route-em2)
+
+lakukan juga penambahan routing di node yang ke dua

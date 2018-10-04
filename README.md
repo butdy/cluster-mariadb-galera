@@ -1,0 +1,2 @@
+# galera-install
+instalasi mariadb dan galera menggunakan 3 node

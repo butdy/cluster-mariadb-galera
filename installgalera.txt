@@ -1,0 +1,65 @@
+### install MariaDB dan Galera
+yum -y update
+yum -y install gmp-devel curl-devel libidn-devel libssh2-devel python-devel openldap-devel vim git net-tools \
+bind-utils gcc make wget memcached libmemcached-devel groupinstall "Development Tools" 
+
+vi /etc/yum.repos.d/MariaDB.repo
+yum -y install epel-release
+yum -y update
+rpm --import https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
+yum -y install MariaDB-server MariaDB-client MariaDB-devel galera less which socat pwgen rsync 
+systemctl enable mariadb
+systemctl start mariadb
+systemctl status mariadb
+mysql_secure_installation
+
+### Ubah konfigurasi mariadb
+cp server.cnf server.cnf.origin
+>server.cnf
+vi server.cnf
+
+### Menambahkan firewall agar bisa komunikasi dengan host lain
+firewall-cmd --permanent --add-service=mysql
+firewall-cmd --zone=public --add-port=3306/tcp --permanent
+firewall-cmd --zone=public --add-port=4567/tcp --permanent
+firewall-cmd --zone=public --add-port=4568/tcp --permanent
+firewall-cmd --zone=public --add-port=4444/tcp --permanent
+firewall-cmd --zone=public --add-port=4567/udp --permanent
+firewall-cmd --reload
+firewall-cmd --list-all
+
+### Disable Selinux
+vi /etc/selinux/config 
+
+### preferred wsrep_sst_backup = xtrabackup-v2
+### install xtrabackup-v2
+wget http://repo.percona.com/release/7Server/RPMS/x86_64/percona-xtrabackup-24-2.4.9-1.el7.x86_64.rpm
+yum localinstall percona-xtrabackup-24-2.4.9-1.el7.x86_64.rpm
+
+### or xtrabackup-v2
+wget http://repo.percona.com/release/7Server/RPMS/x86_64/percona-xtrabackup-22-2.2.13-1.el7.x86_64.rpm
+yum localinstall percona-xtrabackup-22-2.2.13-1.el7.x86_64.rpm
+
+### Ubah Konfigurasi network
+nmtui
+ip addr
+vi /etc/sysconfig/network-scripts/ifcfg-em2 
+vi /etc/sysconfig/network-scripts/route-em2
+systemctl restart network
+ip route show
+
+### START NEW CLUSTER
+galera_new_cluster
+
+## TROUBLESHOOTING
+vi /var/lib/mysql/grastate.dat
+
+sudo yum install psmisc
+killall -KILL mysql mysqld_safe mysqld mysql-systemd
+galera_new_cluster
+## systemctl start mariadb ## untuk node yang lain
+
+## cek log dari mariadb
+tail -f /var/log/mysql/mysql_slow.log
+tail -f /var/log/mysql/mysql_error.log 
+tail -f /var/log/mysql/mysql_query.log 
